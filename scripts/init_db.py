@@ -41,7 +41,7 @@ def main():
         for cat in ("power", "farm", "water", "oxygen"):
             db.add(Facility(session_id=gs.id, name=FACILITY_ZH[cat], category=cat, level=1, status="active", built_day=1))
         db.commit()
-        print("演示档案创建完成。启动：uvicorn app.main:app --reload")
+        print("演示档案创建完成。启动：npm start（或 uvicorn app.main:app --reload）")
     finally:
         db.close()
 

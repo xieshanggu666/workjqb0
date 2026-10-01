@@ -25,13 +25,34 @@
 
 ## 快速开始
 
+环境要求：**Node.js**（任意近年版本，仅用于命令调度，前端无需构建）与 **Python 3.10+**。
+前端静态资源由 FastAPI 后端同端口托管，因此一条命令即可启动前后端：
+
+```bash
+npm run setup   # 安装 Python 依赖并初始化数据库（仅需一次）
+npm start       # 一键启动前后端
+```
+
+访问 http://127.0.0.1:8000 ，在档案大厅新建或继续一局游戏。
+
+| 命令 | 作用 |
+|---|---|
+| `npm run setup` | 安装 Python 依赖 + 初始化数据库（幂等，含演示档案） |
+| `npm start` | 生产模式启动（`PORT=8080 npm start` 可换端口，`HOST`/`PYTHON` 同理） |
+| `npm run dev` | 开发模式启动（代码变更自动重载） |
+| `npm run init-db` | 仅初始化/补齐数据库 |
+| `npm test` | 运行 pytest 测试套件（`npm test -- -k xxx` 可透传参数） |
+
+<details>
+<summary>不使用 npm 的传统启动方式</summary>
+
 ```bash
 pip install -r requirements.txt
 python scripts/init_db.py
 uvicorn app.main:app --reload
 ```
 
-访问 http://127.0.0.1:8000 ，在档案大厅新建或继续一局游戏。
+</details>
 
 ## 目录结构
 
@@ -49,15 +70,18 @@ bunker_survival/
 │   ├── css/style.css      # 样式
 │   ├── js/                # api.js + LobbyView / GameView
 │   └── vendor/            # Vue 3 本地运行时（离线可用）
-├── scripts/init_db.py     # 数据库初始化与演示档案
-├── tests/                 # 引擎单元测试
-└── data/                  # SQLite 数据库
+├── scripts/
+│   ├── manage.js        # npm 一键脚本调度（setup / start / dev / init-db / test）
+│   └── init_db.py       # 数据库初始化与演示档案
+├── package.json         # npm scripts 入口（零 Node 依赖）
+├── tests/               # 引擎单元测试
+└── data/                # SQLite 数据库
 ```
 
 ## 测试
 
 ```bash
-pytest tests -q
+npm test            # 等价于 pytest tests -q
 ```
 
 覆盖资源守恒、建造/升级扣费、居民岗位、危机资源效果、结局判定（胜利/失败/拒绝推进）、
