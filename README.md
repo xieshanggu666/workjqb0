@@ -25,39 +25,68 @@
 
 ## 快速开始
 
+环境要求：Node.js 16+、Python 3.10+（前端由 FastAPI 同进程托管，无需单独启动）。
+
 ```bash
-pip install -r requirements.txt
-python scripts/init_db.py
-uvicorn app.main:app --reload
+# 1. 安装依赖（仅首次）：自动创建 .venv 虚拟环境并安装 Python 依赖
+npm run setup
+# 网络较慢时可指定镜像：
+# PIP_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/ npm run setup
+
+# 2. 一键启动前后端（首次启动自动建库并创建演示档案）
+npm run dev       # 开发模式，带 --reload 热重载
+# 或
+npm start         # 普通模式
 ```
 
 访问 http://127.0.0.1:8000 ，在档案大厅新建或继续一局游戏。
+
+端口/主机可用环境变量覆盖：`PORT=9000 HOST=0.0.0.0 npm start`。
+
+> 说明：本项目前端为无构建的 Vue 3 单页应用（静态资源由 FastAPI 托管），
+> 因此「前后端」在同一个 uvicorn 进程中，一条命令即可全部启动，无需分别拉起两个服务。
+> 不使用 Node 时也可直接运行：`.venv/bin/uvicorn app.main:app --reload`。
+
+### npm 命令一览
+
+| 命令 | 作用 |
+|---|---|
+| `npm run setup` | 首次环境准备：创建 `.venv` 并安装 `requirements.txt` |
+| `npm run dev` | 启动服务（热重载），前后端同时可用 |
+| `npm start` | 启动服务（普通模式） |
+| `npm test` | 运行 pytest 测试套件 |
+| `npm run init-db` | 手动初始化/补种数据库（通常不需要，启动时自动完成） |
 
 ## 目录结构
 
 ```
 bunker_survival/
+├── package.json          # npm 一键入口（setup / dev / start / test / init-db）
 ├── app/
-│   ├── main.py            # 应用入口，托管前端静态资源与 API
+│   ├── main.py            # 应用入口，托管前端静态资源与 API，启动时自动建库播种
+│   ├── bootstrap.py       # 演示档案幂等播种（启动钩子与 init_db 共用）
 │   ├── core/              # 配置 / 数据库
 │   ├── models/            # GameSession / Resident / Facility / EventLog
 │   ├── schemas/           # Pydantic 校验模型
 │   ├── services/engine.py # 游戏核心引擎（资源守恒 / 危机轮盘 / 决策树 / 结局）
 │   └── api/router.py      # REST 接口
+├── scripts/
+│   ├── setup.js           # npm run setup：建 .venv + 装依赖
+│   ├── run.js             # npm dev/start/test/init-db 的跨平台启动器
+│   └── init_db.py         # 数据库显式初始化（正常使用无需手动运行）
 ├── static/
 │   ├── index.html         # Vue 单页应用入口
 │   ├── css/style.css      # 样式
 │   ├── js/                # api.js + LobbyView / GameView
 │   └── vendor/            # Vue 3 本地运行时（离线可用）
-├── scripts/init_db.py     # 数据库初始化与演示档案
-├── tests/                 # 引擎单元测试
-└── data/                  # SQLite 数据库
+├── tests/                 # 引擎/迁移/HTTP 单元测试
+└── data/                  # SQLite 数据库（首次启动自动创建）
 ```
 
 ## 测试
 
 ```bash
-pytest tests -q
+npm test          # 等价于 .venv/bin/python -m pytest tests -q
 ```
 
 覆盖资源守恒、建造/升级扣费、居民岗位、危机资源效果、结局判定（胜利/失败/拒绝推进）、
